@@ -1,18 +1,31 @@
 package main
 
 import (
-	"os"
 	"log"
-    "net/http"
+	"net/http"
+	"os"
 
-    "github.com/prometheus/client_golang/prometheus/promhttp"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func run_metrics_server() {
 	http.Handle("/metrics", promhttp.Handler())
 	http.ListenAndServe(":2112", nil)
 }
+
+var (
+	messagesReceived = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "pongobot_messages_received_total",
+		Help: "The total number of received messages from telegram polling",
+	})
+	messagesSent = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "pongobot_messages_sent_total",
+		Help: "The total number of messages sent from Pongobot",
+	})
+)
 
 func main() {
 
@@ -34,12 +47,15 @@ func main() {
 
 	for update := range updates {
 		if update.Message != nil {
+			messagesReceived.Inc()
+
 			log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
 
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "miau")
 			msg.ReplyToMessageID = update.Message.MessageID
 
 			bot.Send(msg)
+			messagesSent.Inc()
 		}
 	}
 }
