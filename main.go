@@ -1,10 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
 
+	"github.com/robfig/cron/v3"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -18,12 +20,12 @@ func run_metrics_server() {
 
 var (
 	messagesReceived = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "pongobot_messages_received_total",
+		Name: "telegram_messages_received_total",
 		Help: "The total number of received messages from telegram polling",
 	})
 	messagesSent = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "pongobot_messages_sent_total",
-		Help: "The total number of messages sent from Pongobot",
+		Name: "telegram_messages_sent_total",
+		Help: "The total number of messages sent from bots",
 	})
 )
 
@@ -39,6 +41,12 @@ func main() {
 	bot.Debug = true
 
 	log.Printf("Authorized on account %s", bot.Self.UserName)
+
+	c := cron.New()
+	c.AddFunc("@daily", func() {
+		fmt.Println("Testing...")
+	})
+	c.Start()
 
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
