@@ -29,9 +29,7 @@ var (
 	})
 )
 
-func main() {
-
-	go run_metrics_server()
+func run_bot() {
 
 	bot, err := tgbotapi.NewBotAPI(os.Getenv("TELEGRAM_API_TOKEN"))
 	if err != nil {
@@ -66,4 +64,15 @@ func main() {
 			messagesSent.Inc()
 		}
 	}
+}
+
+func main() {
+	// go run_metrics_server()
+
+	// run_bot()
+
+	// for i := 0; i < 6; i++ {
+	// 	fmt.Println(Nqueens(i))
+	// }
+	fmt.Println(Nqueens(15))
 }
